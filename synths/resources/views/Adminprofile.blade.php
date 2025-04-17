@@ -22,7 +22,7 @@
                         <i class="fas fa-user-circle text-4xl text-primary-600 dark:text-primary-400"></i>
                         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Profile Administrateur</h1>
                     </div>
-                    <button onclick="toggleEdit()"
+                    <button id="edit-toggle-btn"
                         class="
                         px-4 py-2 
                         bg-primary-500 
@@ -148,7 +148,7 @@
                                 <i class="fas fa-check"></i>
                                 <span>Enregistrer</span>
                             </button>
-                            <button type="button" onclick="toggleEdit()"
+                            <button type="button" id="cancel-edit-btn"
                                 class="
                                 w-full 
                                 bg-gray-200 
@@ -235,7 +235,7 @@
                                     dark:text-gray-200
                                 "
                                     required>
-                                <button type="button" onclick="togglePasswordVisibility('{{ $field['name'] }}')"
+                                <button type="button" class="password-toggle-btn" data-target="{{ $field['name'] }}"
                                     class="
                                     absolute 
                                     right-3 
@@ -271,14 +271,18 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script>
+    <script>
+        // Execute when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get references to elements
+            const editToggleBtn = document.getElementById('edit-toggle-btn');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const infoDisplay = document.getElementById('info-display');
+            const editForm = document.getElementById('edit-form');
+            const passwordToggleBtns = document.querySelectorAll('.password-toggle-btn');
+
             // Toggle between view and edit modes
             function toggleEdit() {
-                const infoDisplay = document.getElementById('info-display');
-                const editForm = document.getElementById('edit-form');
-
-                // Toggle visibility
                 infoDisplay.classList.toggle('hidden');
                 editForm.classList.toggle('hidden');
 
@@ -290,22 +294,33 @@
                 }
             }
 
-            // Toggle password visibility
-            function togglePasswordVisibility(inputId) {
-                const input = document.getElementById(inputId);
-                const eyeButton = input.nextElementSibling;
-                const eyeIcon = eyeButton.querySelector('i');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    eyeIcon.classList.remove('fa-eye');
-                    eyeIcon.classList.add('fa-eye-slash');
-                } else {
-                    input.type = 'password';
-                    eyeIcon.classList.remove('fa-eye-slash');
-                    eyeIcon.classList.add('fa-eye');
-                }
+            // Add click event listeners
+            if (editToggleBtn) {
+                editToggleBtn.addEventListener('click', toggleEdit);
             }
-        </script>
-    @endpush
+
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', toggleEdit);
+            }
+
+            // Toggle password visibility
+            passwordToggleBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const inputId = this.getAttribute('data-target');
+                    const input = document.getElementById(inputId);
+                    const eyeIcon = this.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        eyeIcon.classList.remove('fa-eye');
+                        eyeIcon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        eyeIcon.classList.remove('fa-eye-slash');
+                        eyeIcon.classList.add('fa-eye');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

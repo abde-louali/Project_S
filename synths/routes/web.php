@@ -9,9 +9,9 @@ use App\Http\Controllers\VereficationController;
 use Illuminate\Container\Attributes\DB;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('Login');
-// });
+Route::get('/', function () {
+    return view('index');
+});
 Route::get('/login', LoginController::class . "@index")->name('loginpage');
 Route::post('/login', LoginController::class . "@logout")->name('logout');
 Route::post('/sendlogin', LoginController::class . "@check");
@@ -33,3 +33,17 @@ Route::post('/verify-documents/{filierName}/{className}', [VereficationControlle
 
 Route::get('/document-verification-results/{filierName}/{className}', [VereficationController::class, 'showResults'])
     ->name('document.verification.results');
+
+// New routes for validation history
+Route::get('/validation-history', [VereficationController::class, 'validationHistory'])
+    ->name('validation.history');
+
+Route::get('/validation-details/{filierName}/{className}', [VereficationController::class, 'validationDetails'])
+    ->name('validation.details');
+
+// Delete validation routes
+Route::delete('/validation/{id}', [VereficationController::class, 'deleteValidation'])
+    ->name('validation.delete');
+
+Route::delete('/validation-details/{filierName}/{className}', [VereficationController::class, 'deleteAllValidations'])
+    ->name('validation.delete.all');

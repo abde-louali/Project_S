@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use App\Models\DocumentValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use ZipArchive;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class VereficationController extends Controller
 {
@@ -98,8 +101,13 @@ class VereficationController extends Controller
 
             // 7. Check the response
             if ($response->successful()) {
+                $results = $response->json();
+
                 // Store the results in the session for the results page
-                session(['verification_results' => $response->json()]);
+                session(['verification_results' => $results]);
+
+                // Store the results in the database
+                $this->saveValidationResults($results, $filierName, $className);
 
                 return response()->json([
                     'success' => true
@@ -119,12 +127,47 @@ class VereficationController extends Controller
         }
     }
 
+    /**
+     * Save document validation results to the database
+     */
+    private function saveValidationResults($results, $filierName, $className)
+    {
+        if (empty($results)) {
+            return;
+        }
+
+        foreach ($results as $result) {
+            try {
+                // Find the student by CIN
+                $student = Student::where('cin', $result['cin'])->first();
+
+                // Create validation record
+                DocumentValidation::create([
+                    'student_id' => $student ? $student->id : null,
+                    'cin' => $result['cin'],
+                    'student_name' => $student ? $student->s_fname . ' ' . $student->s_lname : 'Unknown',
+                    'verified_name' => $result['verified_name'] ?? null,
+                    'is_correct' => $result['is_correct'] ?? false,
+                    'file_details' => $result['files_processed'] ?? null,
+                    'errors' => isset($result['errors']) ? $result['errors'] : null,
+                    'filier_name' => $filierName,
+                    'class_name' => $className,
+                    'validation_date' => Carbon::now()
+                ]);
+            } catch (\Exception $e) {
+                // Log error but continue with other results
+                Log::error('Error saving validation result: ' . $e->getMessage());
+                continue;
+            }
+        }
+    }
+
     public function showResults($filierName, $className)
     {
-
         if (!session()->has('admin')) {
             return redirect('/login');
         }
+
         // Get the verification results from the session
         $results = session('verification_results', []);
 
@@ -139,5 +182,90 @@ class VereficationController extends Controller
             'filierName' => $filierName,
             'className' => $className
         ]);
+    }
+
+    /**
+     * Show all validated documents history
+     */
+    public function validationHistory()
+    {
+        if (!session()->has('admin')) {
+            return redirect('/login');
+        }
+
+        // Get all validation records, grouped by filier and class
+        $validations = DocumentValidation::orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(['filier_name', 'class_name']);
+
+        return view('validation-history', [
+            'validations' => $validations
+        ]);
+    }
+
+    /**
+     * Show validation details for a specific class
+     */
+    public function validationDetails($filierName, $className)
+    {
+        if (!session()->has('admin')) {
+            return redirect('/login');
+        }
+
+        // Get validation records for this class
+        $validations = DocumentValidation::where('filier_name', $filierName)
+            ->where('class_name', $className)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get students data for this class
+        $students = Student::where('code_class', $className)
+            ->where('filier_name', $filierName)
+            ->get();
+
+        return view('validation-details', [
+            'validations' => $validations,
+            'students' => $students,
+            'filierName' => $filierName,
+            'className' => $className
+        ]);
+    }
+
+    /**
+     * Delete a single validation record
+     */
+    public function deleteValidation($id)
+    {
+        if (!session()->has('admin')) {
+            return redirect('/login');
+        }
+
+        $validation = DocumentValidation::findOrFail($id);
+        $filierName = $validation->filier_name;
+        $className = $validation->class_name;
+
+        $validation->delete();
+
+        return redirect()
+            ->route('validation.details', ['filierName' => $filierName, 'className' => $className])
+            ->with('success', 'Validation record has been deleted successfully.');
+    }
+
+    /**
+     * Delete all validation records for a specific class
+     */
+    public function deleteAllValidations($filierName, $className)
+    {
+        if (!session()->has('admin')) {
+            return redirect('/login');
+        }
+
+        DocumentValidation::where('filier_name', $filierName)
+            ->where('class_name', $className)
+            ->delete();
+
+        return redirect()
+            ->route('validation.history')
+            ->with('success', 'All validation records for ' . $filierName . ' / ' . $className . ' have been deleted successfully.');
     }
 }

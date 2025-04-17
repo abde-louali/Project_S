@@ -85,6 +85,9 @@
                     <a href="{{ url('/filires') }}" class="nav-link nav-link-light dark:nav-link-dark">
                         <i class="fas fa-users mr-1"></i> Classes
                     </a>
+                    <a href="{{ route('validation.history') }}" class="nav-link nav-link-light dark:nav-link-dark">
+                        <i class="fas fa-history mr-1"></i> Validations
+                    </a>
 
                     <!-- Theme toggle -->
                     <button id="theme-toggle" type="button"
@@ -135,8 +138,11 @@
                 <a href="{{ url('/classes') }}" class="nav-link nav-link-light dark:nav-link-dark block">
                     <i class="fas fa-user-plus mr-1"></i> Ajouter stagiaires
                 </a>
-                <a href="#" class="nav-link nav-link-light dark:nav-link-dark block">
+                <a href="{{ url('/filires') }}" class="nav-link nav-link-light dark:nav-link-dark block">
                     <i class="fas fa-users mr-1"></i> Classes
+                </a>
+                <a href="{{ route('validation.history') }}" class="nav-link nav-link-light dark:nav-link-dark block">
+                    <i class="fas fa-history mr-1"></i> Validations
                 </a>
 
                 <button id="mobile-theme-toggle"
