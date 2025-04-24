@@ -1,0 +1,71 @@
+USER STORIES - SYSTÈME DE GESTION DES STAGIAIRES
+
+=== UTILISATEUR (STAGIAIRE) ===
+
+1. Connexion Utilisateur
+   - Priorité: Haute
+   - Description: En tant que stagiaire, je veux pouvoir me connecter à mon compte
+   - Critères d'acceptation:
+     * Connexion avec email/username et mot de passe
+     * Message d'erreur clair en cas d'échec
+     
+
+2. Gestion des Documents
+   - Priorité: Haute
+   - Description: En tant que stagiaire, je veux pouvoir gérer mes documents
+   - Critères d'acceptation:
+     * Upload de documents personnels
+     * Types de fichiers acceptés définis
+
+=== ADMINISTRATEUR ===
+
+3. Gestion du Profil Admin
+   - Priorité: Haute
+   - Description: En tant qu'administrateur, je veux pouvoir gérer mon profil
+   - Critères d'acceptation:
+     * Modification des informations personnelles
+     * Changement de mot de passe
+     * Mise à jour des coordonnées
+
+4. Gestion des Classes
+   - Priorité: Haute
+   - Description: En tant qu'administrateur, je veux pouvoir gérer les classes
+   - Critères d'acceptation:
+     * Création de nouvelles classes
+     * Modification des classes existantes
+     * Suppression des classes
+     * Attribution des stagiaires aux classes
+
+5. Gestion des Stagiaires
+   - Priorité: Haute
+   - Description: En tant qu'administrateur, je veux pouvoir gérer les stagiaires
+   - Critères d'acceptation:
+     * Ajout de nouveaux stagiaires
+     * Suppression de stagiaires
+     * Vérification des données des stagiaires
+
+6. Gestion des Documents
+   - Priorité: Haute
+   - Description: En tant qu'administrateur, je veux pouvoir gérer les dossiers des stagiaires
+   - Critères d'acceptation:
+     * Téléchargement des dossiers individuels
+     * Visualisation des documents soumis
+     * Validation des documents
+
+7. Export des Données
+   - Priorité: Moyenne
+   - Description: En tant qu'administrateur, je veux pouvoir exporter les données des stagiaires
+   - Critères d'acceptation:
+     * Export de la liste des stagiaires en PDF
+     * Export en format Excel
+     * Export en format CSV
+     * Filtres de sélection pour l'export
+     * Export par classe ou global
+
+8. Vérification des Données
+   - Priorité: Haute
+   - Description: En tant qu'administrateur, je veux pouvoir vérifier les données des stagiaires
+   - Critères d'acceptation:
+     * Tableau de bord de vérification
+     * Marquage des données vérifiées
+     * Historique des vérifications 

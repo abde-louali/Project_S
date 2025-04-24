@@ -12,6 +12,9 @@ use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class VereficationController extends Controller
 {
@@ -267,5 +270,205 @@ class VereficationController extends Controller
         return redirect()
             ->route('validation.history')
             ->with('success', 'All validation records for ' . $filierName . ' / ' . $className . ' have been deleted successfully.');
+    }
+
+    /**
+     * Export validation history as Excel, CSV, or Text file
+     */
+    public function exportValidationHistory(Request $request)
+    {
+        if (!session()->has('admin')) {
+            return redirect('/login');
+        }
+
+        // Get the requested format (default to excel)
+        $format = $request->query('format', 'excel');
+
+        // Get all validation records
+        $validations = DocumentValidation::orderBy('filier_name')
+            ->orderBy('class_name')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Generate filename based on format
+        $timestamp = date('Y-m-d_H-i-s');
+
+        switch ($format) {
+            case 'csv':
+                return $this->exportAsCsv($validations, "validation_history_{$timestamp}.csv");
+            case 'text':
+                return $this->exportAsText($validations, "validation_history_{$timestamp}.txt");
+            case 'excel':
+            default:
+                return $this->exportAsExcel($validations, "validation_history_{$timestamp}.xlsx");
+        }
+    }
+
+    /**
+     * Export data as Excel
+     */
+    private function exportAsExcel($validations, $filename)
+    {
+        // Create new Spreadsheet object
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set column headers
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Filier');
+        $sheet->setCellValue('C1', 'Class');
+        $sheet->setCellValue('D1', 'CIN');
+        $sheet->setCellValue('E1', 'Student Name');
+        $sheet->setCellValue('F1', 'Verified Name');
+        $sheet->setCellValue('G1', 'Status');
+        $sheet->setCellValue('H1', 'Validation Date');
+        $sheet->setCellValue('I1', 'Created At');
+
+        // Style the header row
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4F46E5'],
+            ],
+        ];
+
+        $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
+
+        // Add data rows
+        $row = 2;
+        foreach ($validations as $validation) {
+            $sheet->setCellValue('A' . $row, $validation->id);
+            $sheet->setCellValue('B' . $row, $validation->filier_name);
+            $sheet->setCellValue('C' . $row, $validation->class_name);
+            $sheet->setCellValue('D' . $row, $validation->cin);
+            $sheet->setCellValue('E' . $row, $validation->student_name);
+            $sheet->setCellValue('F' . $row, $validation->verified_name);
+            $sheet->setCellValue('G' . $row, $validation->is_correct ? 'Correct' : 'Incorrect');
+            $sheet->setCellValue('H' . $row, $validation->validation_date ? $validation->validation_date->format('Y-m-d H:i:s') : '');
+            $sheet->setCellValue('I' . $row, $validation->created_at->format('Y-m-d H:i:s'));
+
+            // Apply row styling based on validation status
+            if ($validation->is_correct) {
+                $sheet->getStyle('G' . $row)->applyFromArray([
+                    'font' => ['color' => ['rgb' => '047857']]
+                ]);
+            } else {
+                $sheet->getStyle('G' . $row)->applyFromArray([
+                    'font' => ['color' => ['rgb' => 'DC2626']]
+                ]);
+            }
+
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'I') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Create the Excel file
+        $writer = new Xlsx($spreadsheet);
+
+        // Save to a temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'export');
+        $writer->save($tempFile);
+
+        // Return the file as a download
+        return response()->download($tempFile, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Export data as CSV
+     */
+    private function exportAsCsv($validations, $filename)
+    {
+        // Create temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'export');
+        $handle = fopen($tempFile, 'w');
+
+        // Add UTF-8 BOM to ensure proper encoding
+        fputs($handle, "\xEF\xBB\xBF");
+
+        // Add headers
+        fputcsv($handle, [
+            'ID',
+            'Filier',
+            'Class',
+            'CIN',
+            'Student Name',
+            'Verified Name',
+            'Status',
+            'Validation Date',
+            'Created At'
+        ]);
+
+        // Add data rows
+        foreach ($validations as $validation) {
+            fputcsv($handle, [
+                $validation->id,
+                $validation->filier_name,
+                $validation->class_name,
+                $validation->cin,
+                $validation->student_name,
+                $validation->verified_name,
+                $validation->is_correct ? 'Correct' : 'Incorrect',
+                $validation->validation_date ? $validation->validation_date->format('Y-m-d H:i:s') : '',
+                $validation->created_at->format('Y-m-d H:i:s')
+            ]);
+        }
+
+        fclose($handle);
+
+        // Return the file as a download
+        return response()->download($tempFile, $filename, [
+            'Content-Type' => 'text/csv',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Export data as plain text
+     */
+    private function exportAsText($validations, $filename)
+    {
+        // Create temporary file
+        $tempFile = tempnam(sys_get_temp_dir(), 'export');
+        $handle = fopen($tempFile, 'w');
+
+        // Write headers with formatting
+        $headers = "ID\tFilier\tClass\tCIN\tStudent Name\tVerified Name\tStatus\tValidation Date\tCreated At\n";
+        $separator = str_repeat('-', 120) . "\n";
+
+        fwrite($handle, $headers);
+        fwrite($handle, $separator);
+
+        // Write data rows
+        foreach ($validations as $validation) {
+            $row = implode("\t", [
+                $validation->id,
+                $validation->filier_name,
+                $validation->class_name,
+                $validation->cin,
+                $validation->student_name,
+                $validation->verified_name ?? 'N/A',
+                $validation->is_correct ? 'Correct' : 'Incorrect',
+                $validation->validation_date ? $validation->validation_date->format('Y-m-d H:i:s') : 'N/A',
+                $validation->created_at->format('Y-m-d H:i:s')
+            ]) . "\n";
+
+            fwrite($handle, $row);
+        }
+
+        fclose($handle);
+
+        // Return the file as a download
+        return response()->download($tempFile, $filename, [
+            'Content-Type' => 'text/plain',
+        ])->deleteFileAfterSend(true);
     }
 }

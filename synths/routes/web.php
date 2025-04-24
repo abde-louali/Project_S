@@ -47,3 +47,7 @@ Route::delete('/validation/{id}', [VereficationController::class, 'deleteValidat
 
 Route::delete('/validation-details/{filierName}/{className}', [VereficationController::class, 'deleteAllValidations'])
     ->name('validation.delete.all');
+
+// Export validation history
+Route::get('/validation-export', [VereficationController::class, 'exportValidationHistory'])
+    ->name('validation.export');

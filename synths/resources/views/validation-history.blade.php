@@ -5,8 +5,13 @@
             <!-- Header -->
             <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden mb-6">
                 <div class="bg-primary-500 dark:bg-primary-700 text-white px-6 py-4">
-                    <h1 class="text-2xl font-bold">Document Validation History</h1>
-                    <p class="text-sm mt-1 text-primary-100">View all document validation results by filier and class</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-2xl font-bold">Document Validation History</h1>
+                            <p class="text-sm mt-1 text-primary-100">View all document validation results by filier and class
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -22,6 +27,32 @@
                     </div>
                 </div>
             @endif
+
+            <!-- Export Button Section -->
+            <div class="flex justify-end mb-6">
+                <div class="relative group">
+                    <button
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors flex items-center">
+                        <i class="fas fa-download mr-2"></i>Export Data
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div
+                        class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-20 hidden group-hover:block">
+                        <a href="{{ route('validation.export', ['format' => 'excel']) }}"
+                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-file-excel mr-2 text-green-600"></i>Export as Excel
+                        </a>
+                        <a href="{{ route('validation.export', ['format' => 'csv']) }}"
+                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-file-csv mr-2 text-blue-600"></i>Export as CSV
+                        </a>
+                        <a href="{{ route('validation.export', ['format' => 'text']) }}"
+                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-file-alt mr-2 text-gray-600"></i>Export as Text
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             @if ($validations->isEmpty())
                 <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 text-center">

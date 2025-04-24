@@ -1,0 +1,62 @@
+STRUCTURE DU PROJET
+==================
+📁 Project_5/
+├── 📁 python/
+│   └── 📄 app.py
+└── 📁 synths/
+    ├── 📁 app/
+    │   └── 📁 Http/
+    │       └── 📁 Controllers/
+    │           ├── 📄 AdminController.php
+    │           ├── 📄 ClasseController.php
+    │           ├── 📄 Controller.php
+    │           ├── 📄 FoldersController.php
+    │           ├── 📄 LoginController.php
+    │           ├── 📄 StudentController.php
+    │           └── 📄 VereficationController.php
+    ├── 📁 Models/
+    │   ├── 📄 Admin.php
+    │   ├── 📄 Classe.php
+    │   ├── 📄 Student.php
+    │   └── 📄 User.php
+    ├── 📁 Providers/
+    ├── 📁 bootstrap/
+    ├── 📁 config/
+    ├── 📁 database/
+    ├── 📁 public/
+    ├── 📁 resources/
+    │   ├── 📁 css/
+    │   │   └── 📄 app.css
+    │   ├── 📁 js/
+    │   │   ├── 📄 app.js
+    │   │   └── 📄 bootstrap.js
+    │   └── 📁 views/
+    │       └── 📁 layout/
+    │           ├── 📄 header.blade.php
+    │           ├── 📄 Admin.blade.php
+    │           ├── 📄 Adminprofile.blade.php
+    │           ├── 📄 Ajouterclass.blade.php
+    │           ├── 📄 Classdetails.blade.php
+    │           ├── 📄 document-verification-results.blade.php
+    │           ├── 📄 filiers.blade.php
+    │           ├── 📄 Login.blade.php
+    │           ├── 📄 Student.blade.php
+    │           └── 📄 welcome.blade.php
+    ├── 📁 routes/
+    │   ├── 📄 console.php
+    │   └── 📄 web.php
+    ├── 📁 storage/
+    ├── 📁 tests/
+    ├── 📄 .editorconfig
+    ├── 📄 .env.example
+    ├── 📄 .gitattributes
+    ├── 📄 .gitignore
+    ├── 📄 artisan
+    ├── 📄 composer.json
+    ├── 📄 composer.lock
+    ├── 📄 package-lock.json
+    ├── 📄 package.json
+    ├── 📄 phpunit.xml
+    ├── 📄 README.md
+    ├── 📄 tailwind.config.js
+    └── 📄 vite.config.js

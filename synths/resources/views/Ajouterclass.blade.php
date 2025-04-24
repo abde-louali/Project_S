@@ -48,34 +48,39 @@
 
         <!-- Classes Table Card -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+            <div
+                class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
                 <h5 class="text-xl font-semibold text-gray-900 dark:text-white">List of Classes</h5>
+                <div class="flex items-center">
+                    <label for="tableSearch" class="mr-2 text-gray-700 dark:text-gray-300 font-medium">Search:</label>
+                    <input type="text" id="tableSearch"
+                        class="rounded-md border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                </div>
             </div>
             <div class="p-6 overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+                <table id="classesTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                    <thead class="bg-gray-700 text-white">
                         <tr>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                CIN</th>
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer">
+                                CIN <span class="sort-icon">↕</span></th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Last Name</th>
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer">
+                                NOM <span class="sort-icon">↕</span></th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                First Name</th>
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer">
+                                PRÉNOM <span class="sort-icon">↕</span></th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Filière</th>
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer">
+                                FILIÈRE <span class="sort-icon">↕</span></th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Class Code</th>
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer">
+                                CLASSE <span class="sort-icon">↕</span></th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Age</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Actions</th>
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer">
+                                AGE <span class="sort-icon">↕</span></th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                                ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -218,4 +223,149 @@
             @endif
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('tableSearch');
+            const table = document.getElementById('classesTable');
+            const rows = table.querySelectorAll('tbody tr');
+            const headers = table.querySelectorAll('thead th');
+
+            // Enhanced search functionality 
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+
+                rows.forEach(row => {
+                    let found = false;
+                    const cells = row.querySelectorAll('td');
+
+                    // Check each cell in the row
+                    cells.forEach((cell, index) => {
+                        if (index < 6) { // Skip the actions column
+                            const text = cell.textContent.toLowerCase().trim();
+                            if (text.includes(searchTerm)) {
+                                found = true;
+                            }
+                        }
+                    });
+
+                    row.style.display = found ? '' : 'none';
+                });
+
+                // Show a message if no results found
+                let visibleCount = 0;
+                rows.forEach(row => {
+                    if (row.style.display !== 'none') {
+                        visibleCount++;
+                    }
+                });
+
+                // Highlight matching text (optional)
+                if (searchTerm.length > 0) {
+                    highlightMatches(searchTerm);
+                }
+            });
+
+            // Function to highlight matching text
+            function highlightMatches(term) {
+                // Remove existing highlights
+                rows.forEach(row => {
+                    if (row.style.display !== 'none') {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach((cell, cellIndex) => {
+                            if (cellIndex < 6) { // Skip action column
+                                const originalText = cell.textContent;
+                                cell.innerHTML = originalText;
+                            }
+                        });
+                    }
+                });
+
+                // Add new highlights
+                rows.forEach(row => {
+                    if (row.style.display !== 'none') {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach((cell, cellIndex) => {
+                            if (cellIndex < 6) { // Skip action column
+                                const originalText = cell.textContent;
+                                const lowerText = originalText.toLowerCase();
+                                const matchIndex = lowerText.indexOf(term);
+
+                                if (matchIndex >= 0) {
+                                    let html = originalText.substring(0, matchIndex);
+                                    html += '<span class="bg-yellow-200 dark:bg-yellow-700">';
+                                    html += originalText.substring(matchIndex, matchIndex + term
+                                        .length);
+                                    html += '</span>';
+                                    html += originalText.substring(matchIndex + term.length);
+                                    cell.innerHTML = html;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Sort functionality
+            headers.forEach((header, index) => {
+                if (index < 6) { // Skip the Actions column
+                    header.addEventListener('click', function() {
+                        sortTable(index);
+                    });
+                }
+            });
+
+            function sortTable(columnIndex) {
+                let switching = true;
+                let direction = 'asc';
+                let switchcount = 0;
+
+                while (switching) {
+                    switching = false;
+                    const rowsArray = Array.from(rows);
+
+                    for (let i = 0; i < rowsArray.length - 1; i++) {
+                        let shouldSwitch = false;
+
+                        const x = rowsArray[i].querySelectorAll('td')[columnIndex].textContent.trim();
+                        const y = rowsArray[i + 1].querySelectorAll('td')[columnIndex].textContent.trim();
+
+                        // Check if numeric column (e.g., age)
+                        if (columnIndex === 5) {
+                            if (direction === 'asc') {
+                                if (parseInt(x) > parseInt(y)) shouldSwitch = true;
+                            } else {
+                                if (parseInt(x) < parseInt(y)) shouldSwitch = true;
+                            }
+                        } else {
+                            if (direction === 'asc') {
+                                if (x.toLowerCase() > y.toLowerCase()) shouldSwitch = true;
+                            } else {
+                                if (x.toLowerCase() < y.toLowerCase()) shouldSwitch = true;
+                            }
+                        }
+
+                        if (shouldSwitch) {
+                            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+                            switching = true;
+                            switchcount++;
+                            break;
+                        }
+                    }
+
+                    if (switchcount === 0 && direction === 'asc') {
+                        direction = 'desc';
+                        switching = true;
+                    }
+                }
+
+                // Update sort indicators
+                headers.forEach(h => {
+                    h.querySelector('.sort-icon').textContent = '↕';
+                });
+
+                headers[columnIndex].querySelector('.sort-icon').textContent = direction === 'asc' ? '↓' : '↑';
+            }
+        });
+    </script>
 @endsection
