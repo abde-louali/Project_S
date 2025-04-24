@@ -290,18 +290,44 @@
                                     $studentFolder = public_path("uploads/{$filierName}/{$className}/{$folderName}");
 
                                     $hasFolder = is_dir($studentFolder);
-                                    $bacImg =
-                                        $hasFolder && file_exists("{$studentFolder}/bac_img.png")
-                                            ? asset("uploads/{$filierName}/{$className}/{$folderName}/bac_img.png")
-                                            : null;
-                                    $idCard =
-                                        $hasFolder && file_exists("{$studentFolder}/id_card_img.jpg")
-                                            ? asset("uploads/{$filierName}/{$className}/{$folderName}/id_card_img.jpg")
-                                            : null;
-                                    $birthImg =
-                                        $hasFolder && file_exists("{$studentFolder}/birth_img.png")
-                                            ? asset("uploads/{$filierName}/{$className}/{$folderName}/birth_img.png")
-                                            : null;
+
+                                    // Check multiple possible extensions for each document type
+                                    $bacImg = null;
+                                    $idCard = null;
+                                    $birthImg = null;
+
+                                    // Image extensions to check
+                                    $extensions = ['png', 'jpg', 'jpeg', 'JPG', 'JPEG', 'PNG'];
+
+                                    // Find bac_img with any extension
+                                    foreach ($extensions as $ext) {
+                                        if ($hasFolder && file_exists("{$studentFolder}/bac_img.{$ext}")) {
+                                            $bacImg = asset(
+                                                "uploads/{$filierName}/{$className}/{$folderName}/bac_img.{$ext}",
+                                            );
+                                            break;
+                                        }
+                                    }
+
+                                    // Find id_card_img with any extension
+                                    foreach ($extensions as $ext) {
+                                        if ($hasFolder && file_exists("{$studentFolder}/id_card_img.{$ext}")) {
+                                            $idCard = asset(
+                                                "uploads/{$filierName}/{$className}/{$folderName}/id_card_img.{$ext}",
+                                            );
+                                            break;
+                                        }
+                                    }
+
+                                    // Find birth_img with any extension
+                                    foreach ($extensions as $ext) {
+                                        if ($hasFolder && file_exists("{$studentFolder}/birth_img.{$ext}")) {
+                                            $birthImg = asset(
+                                                "uploads/{$filierName}/{$className}/{$folderName}/birth_img.{$ext}",
+                                            );
+                                            break;
+                                        }
+                                    }
                                 @endphp
 
                                 <tr

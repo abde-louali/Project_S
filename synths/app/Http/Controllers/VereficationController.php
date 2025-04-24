@@ -106,14 +106,30 @@ class VereficationController extends Controller
             if ($response->successful()) {
                 $results = $response->json();
 
+                // Count updated vs new records
+                $existingRecords = DocumentValidation::where('filier_name', $filierName)
+                    ->where('class_name', $className)
+                    ->pluck('cin')
+                    ->toArray();
+
+                $resultCins = array_column($results, 'cin');
+                $updatedCount = count(array_intersect($resultCins, $existingRecords));
+                $newCount = count($results) - $updatedCount;
+
                 // Store the results in the session for the results page
-                session(['verification_results' => $results]);
+                session([
+                    'verification_results' => $results,
+                    'updated_count' => $updatedCount,
+                    'new_count' => $newCount
+                ]);
 
                 // Store the results in the database
                 $this->saveValidationResults($results, $filierName, $className);
 
                 return response()->json([
-                    'success' => true
+                    'success' => true,
+                    'updated' => $updatedCount > 0,
+                    'message' => $updatedCount > 0 ? 'Validation records updated.' : 'New validation records created.'
                 ]);
             } else {
                 return response()->json([
@@ -144,19 +160,33 @@ class VereficationController extends Controller
                 // Find the student by CIN
                 $student = Student::where('cin', $result['cin'])->first();
 
-                // Create validation record
-                DocumentValidation::create([
+                // Check if a validation record already exists for this student in this class
+                $existingValidation = DocumentValidation::where('cin', $result['cin'])
+                    ->where('filier_name', $filierName)
+                    ->where('class_name', $className)
+                    ->first();
+
+                $validationData = [
                     'student_id' => $student ? $student->id : null,
-                    'cin' => $result['cin'],
                     'student_name' => $student ? $student->s_fname . ' ' . $student->s_lname : 'Unknown',
                     'verified_name' => $result['verified_name'] ?? null,
                     'is_correct' => $result['is_correct'] ?? false,
                     'file_details' => $result['files_processed'] ?? null,
                     'errors' => isset($result['errors']) ? $result['errors'] : null,
-                    'filier_name' => $filierName,
-                    'class_name' => $className,
                     'validation_date' => Carbon::now()
-                ]);
+                ];
+
+                if ($existingValidation) {
+                    // Update existing validation record
+                    $existingValidation->update($validationData);
+                } else {
+                    // Create new validation record if none exists
+                    $validationData['cin'] = $result['cin'];
+                    $validationData['filier_name'] = $filierName;
+                    $validationData['class_name'] = $className;
+
+                    DocumentValidation::create($validationData);
+                }
             } catch (\Exception $e) {
                 // Log error but continue with other results
                 Log::error('Error saving validation result: ' . $e->getMessage());
@@ -173,6 +203,8 @@ class VereficationController extends Controller
 
         // Get the verification results from the session
         $results = session('verification_results', []);
+        $updatedCount = session('updated_count', 0);
+        $newCount = session('new_count', 0);
 
         // Get students data for this class
         $students = Student::where('code_class', $className)
@@ -183,7 +215,9 @@ class VereficationController extends Controller
             'results' => $results,
             'students' => $students,
             'filierName' => $filierName,
-            'className' => $className
+            'className' => $className,
+            'updatedCount' => $updatedCount,
+            'newCount' => $newCount
         ]);
     }
 

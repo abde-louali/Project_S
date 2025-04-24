@@ -99,21 +99,16 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                     {{ $classe->age }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <form action="{{ route('classes.destroy', $classe->cin) }}" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this student?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm inline-flex items-center transition-colors duration-300">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            Delete
-                                        </button>
-                                    </form>
+                                    <button data-cin="{{ $classe->cin }}"
+                                        class="delete-student-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm inline-flex items-center transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -249,66 +244,14 @@
                         }
                     });
 
+                    // Show or hide the row based on search results
                     row.style.display = found ? '' : 'none';
                 });
-
-                // Show a message if no results found
-                let visibleCount = 0;
-                rows.forEach(row => {
-                    if (row.style.display !== 'none') {
-                        visibleCount++;
-                    }
-                });
-
-                // Highlight matching text (optional)
-                if (searchTerm.length > 0) {
-                    highlightMatches(searchTerm);
-                }
             });
 
-            // Function to highlight matching text
-            function highlightMatches(term) {
-                // Remove existing highlights
-                rows.forEach(row => {
-                    if (row.style.display !== 'none') {
-                        const cells = row.querySelectorAll('td');
-                        cells.forEach((cell, cellIndex) => {
-                            if (cellIndex < 6) { // Skip action column
-                                const originalText = cell.textContent;
-                                cell.innerHTML = originalText;
-                            }
-                        });
-                    }
-                });
-
-                // Add new highlights
-                rows.forEach(row => {
-                    if (row.style.display !== 'none') {
-                        const cells = row.querySelectorAll('td');
-                        cells.forEach((cell, cellIndex) => {
-                            if (cellIndex < 6) { // Skip action column
-                                const originalText = cell.textContent;
-                                const lowerText = originalText.toLowerCase();
-                                const matchIndex = lowerText.indexOf(term);
-
-                                if (matchIndex >= 0) {
-                                    let html = originalText.substring(0, matchIndex);
-                                    html += '<span class="bg-yellow-200 dark:bg-yellow-700">';
-                                    html += originalText.substring(matchIndex, matchIndex + term
-                                        .length);
-                                    html += '</span>';
-                                    html += originalText.substring(matchIndex + term.length);
-                                    cell.innerHTML = html;
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-
-            // Sort functionality
+            // Sorting functionality
             headers.forEach((header, index) => {
-                if (index < 6) { // Skip the Actions column
+                if (index < 6) { // Only make the first 6 columns sortable (exclude actions)
                     header.addEventListener('click', function() {
                         sortTable(index);
                     });
@@ -317,55 +260,147 @@
 
             function sortTable(columnIndex) {
                 let switching = true;
+                let shouldSwitch = false;
                 let direction = 'asc';
                 let switchcount = 0;
+                let i, x, y;
+
+                // Get current direction from the clicked header
+                const headerClicked = headers[columnIndex];
+                const icon = headerClicked.querySelector('.sort-icon');
+
+                // Determine or change sort direction
+                if (icon.textContent === '↑') {
+                    direction = 'desc';
+                    icon.textContent = '↓';
+                } else {
+                    direction = 'asc';
+                    icon.textContent = '↑';
+                }
+
+                // Reset all other headers
+                headers.forEach((h, idx) => {
+                    if (idx !== columnIndex && idx < 6) {
+                        h.querySelector('.sort-icon').textContent = '↕';
+                    }
+                });
 
                 while (switching) {
                     switching = false;
-                    const rowsArray = Array.from(rows);
+                    const rowsArray = Array.from(table.querySelectorAll('tbody tr'));
 
-                    for (let i = 0; i < rowsArray.length - 1; i++) {
-                        let shouldSwitch = false;
+                    for (i = 0; i < rowsArray.length - 1; i++) {
+                        shouldSwitch = false;
+                        x = rowsArray[i].getElementsByTagName('td')[columnIndex];
+                        y = rowsArray[i + 1].getElementsByTagName('td')[columnIndex];
 
-                        const x = rowsArray[i].querySelectorAll('td')[columnIndex].textContent.trim();
-                        const y = rowsArray[i + 1].querySelectorAll('td')[columnIndex].textContent.trim();
+                        // Check if column is numeric (e.g., age)
+                        if (columnIndex === 5) { // Age column
+                            const xValue = parseInt(x.textContent.trim());
+                            const yValue = parseInt(y.textContent.trim());
 
-                        // Check if numeric column (e.g., age)
-                        if (columnIndex === 5) {
-                            if (direction === 'asc') {
-                                if (parseInt(x) > parseInt(y)) shouldSwitch = true;
-                            } else {
-                                if (parseInt(x) < parseInt(y)) shouldSwitch = true;
+                            if (direction === 'asc' && xValue > yValue) {
+                                shouldSwitch = true;
+                                break;
+                            } else if (direction === 'desc' && xValue < yValue) {
+                                shouldSwitch = true;
+                                break;
                             }
-                        } else {
-                            if (direction === 'asc') {
-                                if (x.toLowerCase() > y.toLowerCase()) shouldSwitch = true;
-                            } else {
-                                if (x.toLowerCase() < y.toLowerCase()) shouldSwitch = true;
-                            }
-                        }
+                        } else { // Text columns
+                            const xValue = x.textContent.trim().toLowerCase();
+                            const yValue = y.textContent.trim().toLowerCase();
 
-                        if (shouldSwitch) {
-                            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
-                            switching = true;
-                            switchcount++;
-                            break;
+                            if (direction === 'asc' && xValue > yValue) {
+                                shouldSwitch = true;
+                                break;
+                            } else if (direction === 'desc' && xValue < yValue) {
+                                shouldSwitch = true;
+                                break;
+                            }
                         }
                     }
 
-                    if (switchcount === 0 && direction === 'asc') {
-                        direction = 'desc';
+                    if (shouldSwitch) {
+                        rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
                         switching = true;
+                        switchcount++;
+                    } else {
+                        if (switchcount === 0 && direction === 'asc') {
+                            direction = 'desc';
+                            icon.textContent = '↓';
+                            switching = true;
+                        }
                     }
                 }
-
-                // Update sort indicators
-                headers.forEach(h => {
-                    h.querySelector('.sort-icon').textContent = '↕';
-                });
-
-                headers[columnIndex].querySelector('.sort-icon').textContent = direction === 'asc' ? '↓' : '↑';
             }
+
+            // Handle student deletion with AJAX
+            const deleteButtons = document.querySelectorAll('.delete-student-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const cin = this.getAttribute('data-cin');
+
+                    if (confirm('Are you sure you want to delete this student?')) {
+                        // Create a loading indicator
+                        const originalContent = this.innerHTML;
+                        this.innerHTML =
+                            '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                        this.disabled = true;
+
+                        // Create form data
+                        const formData = new FormData();
+                        formData.append('_token', '{{ csrf_token() }}');
+                        formData.append('_method', 'DELETE');
+
+                        // Send AJAX request
+                        fetch('{{ url('classes') }}/' + cin, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Remove the row from the table
+                                    const row = this.closest('tr');
+                                    row.style.backgroundColor = '#FEE2E2';
+                                    setTimeout(() => {
+                                        row.remove();
+                                    }, 500);
+
+                                    // Show success message
+                                    const successAlert = document.createElement('div');
+                                    successAlert.className =
+                                        'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded';
+                                    successAlert.innerHTML = '<p>' + data.message + '</p>';
+
+                                    const container = document.querySelector('.container');
+                                    container.insertBefore(successAlert, container.firstChild);
+
+                                    // Auto-dismiss the alert after 3 seconds
+                                    setTimeout(() => {
+                                        successAlert.remove();
+                                    }, 3000);
+                                } else {
+                                    // Show error message and restore button
+                                    alert(data.message || 'Error deleting student');
+                                    this.innerHTML = originalContent;
+                                    this.disabled = false;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert(
+                                    'An error occurred while deleting the student. Please try again.'
+                                );
+                                this.innerHTML = originalContent;
+                                this.disabled = false;
+                            });
+                    }
+                });
+            });
         });
     </script>
 @endsection

@@ -22,6 +22,13 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Update info -->
+                <div class="px-6 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>When validating a class again, existing records will be updated instead of creating
+                        duplicates.</span>
+                </div>
             </div>
 
             @if (session('success'))

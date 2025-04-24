@@ -17,6 +17,34 @@
                 </div>
             </div>
 
+            <!-- Validation Status Info -->
+            @php
+                $updatedCount = session('updated_count', 0);
+                $newCount = session('new_count', 0);
+                $totalCount = count($results);
+            @endphp
+            <div class="bg-blue-50 dark:bg-blue-900/20 m-6 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 class="text-lg font-medium text-blue-800 dark:text-blue-300 mb-2">Validation Summary</h3>
+                <div class="flex flex-wrap gap-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-3 flex-1 shadow-sm">
+                        <span class="text-gray-500 dark:text-gray-400 text-sm">Total Records</span>
+                        <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ $totalCount }}</p>
+                    </div>
+                    @if ($updatedCount > 0)
+                        <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 flex-1 shadow-sm">
+                            <span class="text-orange-500 dark:text-orange-400 text-sm">Updated Records</span>
+                            <p class="text-2xl font-bold text-orange-600 dark:text-orange-300">{{ $updatedCount }}</p>
+                        </div>
+                    @endif
+                    @if ($newCount > 0)
+                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 flex-1 shadow-sm">
+                            <span class="text-green-500 dark:text-green-400 text-sm">New Records</span>
+                            <p class="text-2xl font-bold text-green-600 dark:text-green-300">{{ $newCount }}</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <div id="loading" class="py-12 flex flex-col items-center justify-center hidden">
                 <div
                     class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-light dark:border-primary-dark">
