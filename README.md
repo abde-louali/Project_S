@@ -2,7 +2,7 @@
 
 Une application web complète pour la gestion des stagiaires, développée avec PHP, MySQL et Bootstrap, permettant aux administrateurs de gérer efficacement les dossiers des stagiaires.
 
-![Logo ISTA](image/ofppt_logo.png)
+![alt text](./synths/public/image/ofppt_logo.png)
 
 ## 👨‍💻 Développeurs
 
