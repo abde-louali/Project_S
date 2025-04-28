@@ -13,7 +13,7 @@ model = ocr_predictor(pretrained=True)
 
 # Keywords to search for
 keywords = ["Prénom", "Nom", "Le candidat(e)"]
-
+ 
 
 def normalize_value(value):
     """Clean and normalize extracted values."""
