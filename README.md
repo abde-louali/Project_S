@@ -151,7 +151,11 @@ STRUCTURE DU PROJET
 - Consultation du profil
 - Upload des documents
 - Mise à jour des informations personnelles
+Access the application
 
+Student Panel:
+📱 Screenshots 🔓 Login Pages:
+![alt text](./images/Screenshot 2025-04-23 104919.png)
 ## 🔒 Sécurité
 
 - Authentification sécurisée
