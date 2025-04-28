@@ -156,6 +156,15 @@ Access the application
 Student Panel:
 📱 Screenshots 🔓 Login Pages:
 ![alt text](./Documents/images/Screenshot%202025-04-23%20104919.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20123154.png)
+Admin Panel:
+![alt text](./Documents/images/Screenshot%202025-04-23%20122708.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20122726.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20122747.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20122811.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20123056.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20123110.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20123125.png)
 ## 🔒 Sécurité
 
 - Authentification sécurisée
