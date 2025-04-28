@@ -201,7 +201,7 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE.md](LICENSE.md) pour p
   - Email: nisrineelatmani74@gmail.com
 - **Abdsamad Louali**
   - GitHub: [@abde-louali]
-  - Email: abdsamadlouali@gmail.com
+  - Email: abdesamadlouali1@gmail.com
 
 ## 🙏 Remerciements
 
