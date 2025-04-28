@@ -155,7 +155,7 @@ Access the application
 
 Student Panel:
 📱 Screenshots 🔓 Login Pages:
-![alt text](./images/Screenshot2025-04-23104919.png)
+![alt text](./Documents/images/Screenshot%202025-04-23%20104919.png)
 ## 🔒 Sécurité
 
 - Authentification sécurisée
